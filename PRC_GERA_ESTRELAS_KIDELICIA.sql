@@ -1,10 +1,19 @@
-create or replace PROCEDURE PRC_GERA_ESTRELAS_KIDELICIA AS 
+create or replace PROCEDURE PRC_GERA_ESTRELAS_KIDELICIA2 AS 
 v_vl_med_compra number(30,2) := 00;
 v_estrelas number(1) := 0;
 
 v_contador number := 00;
 
-cursor c_cli is select c.nr_cliente, p.nr_pedido from kd_cliente c, kd_item_pedido p;
+
+-- CURSOR ORIGINAL ESTÁ FAZENDO OPERAÇÃO CARTESIANA, NÃO PERFORMÁTICA
+-- cursor c_cli is select c.nr_cliente, p.nr_pedido
+--      from kd_cliente c
+--      join kd_pedido p on p.nr_cliente = c.nr_cliente;
+
+
+-- A tabela que contém a relação entre nr cliente e nr pedido é a KD Pedido
+-- e ela também não é necessária na tabela
+cursor c_cli is select c.nr_cliente from kd_cliente c
 
 rcli c_cli%rowtype;
 
@@ -16,8 +25,8 @@ BEGIN
      if c_cli%notfound then
         exit;
      end if;
-
-
+     
+     -- A tabela KD_PEDIDO não possui índice na foreign key nr_cliente
       select avg(vl_tot_pedido) 
       into   v_vl_med_compra
       from   kd_pedido
@@ -35,7 +44,9 @@ BEGIN
            v_estrelas := 5;
       end if;
 
-      update kd_cliente set qt_estrelas = v_estrelas, vl_medio_compra = v_vl_med_compra
+      update kd_cliente
+          set qt_estrelas = v_estrelas,
+          vl_medio_compra = v_vl_med_compra
       where nr_cliente = rcli.nr_cliente;
 
       v_contador := v_contador + 1;
@@ -46,4 +57,4 @@ BEGIN
 
   end loop;  
   close c_cli;
-END PRC_GERA_ESTRELAS_KIDELICIA;
+END PRC_GERA_ESTRELAS_KIDELICIA2;
