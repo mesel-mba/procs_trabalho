@@ -20,15 +20,17 @@ BEGIN
      
       V_TOT_ITEM := NVL(X.QT_DIAS,0) * NVL(X.VL_LOCACAO,0);
       V_DT_RETIRADA := X.DT_RETIRADA + 1;
-      V_DT_ENTREGA := V_DT_RETIRADA;
+      -- V_DT_ENTREGA := V_DT_RETIRADA; -- remoção dessa variavel já que ela usa
+      -- um valor já existente
       V_QT_DIAS := NVL(X.QT_DIAS,0) + 1;
       V_VL_LOCACAO := NVL(X.VL_LOCACAO,0) + 1;
       
       -- TABELA JÁ UTILIZA INDICE COMPOSTO DE NR_ITEM E NR_PEDIDO
+      -- podemos dropar outros indices (IDX_ILOC1, IDX_ILOC2, IDX_ILOC3, IDX_ILOC4, IDX_ILOC5) para 
       UPDATE LOC_ITEM_LOCACAO
         SET VL_TOTAL = V_TOT_ITEM,
             DT_RETIRADA = V_DT_RETIRADA,
-            DT_ENTREGA = V_DT_ENTREGA,
+            DT_ENTREGA = V_DT_RETIRADA,
             QT_DIAS = V_QT_DIAS,
             VL_LOCACAO = V_VL_LOCACAO
       WHERE  NR_PEDIDO = X.NR_PEDIDO
@@ -49,3 +51,6 @@ END PRC_ATUALIZA_ITEM_PEDIDO_LOC3;
 SET TIMING ON;
 EXECUTE PRC_ATUALIZA_ITEM_PEDIDO_LOC; -- SETAR UM SAMPLE
 EXECUTE PRC_ATUALIZA_ITEM_PEDIDO_LOC3; -- SETAR UM SAMPLE NA LINHA 17
+
+-- É necessário rodar o rebuild das estatisticas da tabela após o
+-- drop dos indices

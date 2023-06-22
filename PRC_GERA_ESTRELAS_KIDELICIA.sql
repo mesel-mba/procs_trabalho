@@ -27,6 +27,7 @@ BEGIN
      end if;
      
      -- A tabela KD_PEDIDO não possui índice na foreign key nr_cliente
+     -- Deve se criar um indice nessa tabela em nr_cliente
       select avg(vl_tot_pedido) 
       into   v_vl_med_compra
       from   kd_pedido
@@ -44,6 +45,7 @@ BEGIN
            v_estrelas := 5;
       end if;
 
+      -- dropar indice de qt_estrelas, ele não é usado
       update kd_cliente
           set qt_estrelas = v_estrelas,
           vl_medio_compra = v_vl_med_compra
@@ -58,3 +60,5 @@ BEGIN
   end loop;  
   close c_cli;
 END PRC_GERA_ESTRELAS_KIDELICIA2;
+
+-- rebuild de estatisticas da tabela para poder otimizar o run
